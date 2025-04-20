@@ -1,0 +1,130 @@
+spark.master:
+  type: list
+  values:
+    - local
+    - local[*]
+
+spark.executor.memory:
+  type: range
+  min: 1
+  max: 16
+  step: 1
+  unit: g
+
+spark.executor.cores:
+  type: range
+  min: 1
+  max: 8
+  step: 1
+
+spark.driver.memory:
+  type: range
+  min: 1
+  max: 16
+  step: 1
+  unit: g
+
+spark.driver.cores:
+  type: range
+  min: 1
+  max: 8
+  step: 1
+
+spark.default.parallelism:
+  type: range
+  min: 1
+  max: 100
+  step: 10
+
+spark.sql.shuffle.partitions:
+  type: range
+  min: 1
+  max: 200
+  step: 10
+
+spark.sql.warehouse.dir:
+  type: list
+  values:
+    - /tmp/hive/warehouse
+
+spark.executor.extraJavaOptions:
+  type: list
+  values:
+    - -XX:+UseG1GC
+    - -XX:+UseParallelGC
+
+spark.driver.extraJavaOptions:
+  type: list
+  values:
+    - -XX:+UseG1GC
+    - -XX:+UseParallelGC
+
+spark.hadoop.fs.s3a.committer.magic.enabled:
+  type: list
+  values:
+    - true
+    - false
+
+spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a:
+  type: list
+  values:
+    - org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory
+
+fs.s3a.experimental.input.fadvise:
+  type: list
+  values:
+    - random
+    - sequential
+    - normal
+
+fs.s3a.threads.max:
+  type: range
+  min: 10
+  max: 100
+  step: 10
+
+fs.s3a.connection.maximum:
+  type: range
+  min: 10
+  max: 100
+  step: 10
+
+fs.s3a.block.size:
+  type: range
+  min: 8
+  max: 128
+  step: 8
+  unit: M
+
+fs.s3a.bucket.probe:
+  type: range
+  min: 0
+  max: 1
+  step: 1
+
+fs.s3a.committer.name:
+  type: list
+  values:
+    - magic
+    - directory
+    - partitioned
+    - file
+
+spark.sql.sources.commitProtocolClass:
+  type: list
+  values:
+    - org.apache.spark.internal.io.cloud.PathOutputCommitProtocol
+    - org.apache.spark.sql.execution.datasources.SQLHadoopMapReduceCommitProtocol
+
+spark.hadoop.fs.s3a.committer.magic.enabled:
+  type: list
+  values:
+    - true
+    - false
+
+spark.sql.parquet.output.committer.class:
+  type: list
+  values:
+    - org.apache.spark.internal.io.cloud.BindingParquetOutputCommitter
+    - org.apache.parquet.hadoop.ParquetOutputCommitter
+    - com.amazon.emr.committer.EmrOptimizedSparkSqlParquetOutputCommitter

@@ -1,0 +1,191 @@
+spark.master:
+  type: list
+  values:
+    - local
+    - local[*]
+
+spark.app.name:
+  type: list
+  values:
+    - MySparkApp
+
+spark.executor.memory:
+  type: range
+  min: 1
+  max: 16
+  step: 1
+  unit: g
+
+spark.executor.cores:
+  type: range
+  min: 1
+  max: 8
+  step: 1
+
+spark.driver.memory:
+  type: range
+  min: 1
+  max: 16
+  step: 1
+  unit: g
+
+spark.driver.cores:
+  type: range
+  min: 1
+  max: 8
+  step: 1
+
+spark.default.parallelism:
+  type: range
+  min: 1
+  max: 100
+  step: 10
+
+spark.sql.shuffle.partitions:
+  type: range
+  min: 1
+  max: 200
+  step: 10
+
+spark.sql.warehouse.dir:
+  type: list
+  values:
+    - /user/hive/warehouse
+
+spark.executor.extraJavaOptions:
+  type: list
+  values:
+    - -XX:+UseG1GC
+    - -XX:+UseParallelGC
+
+spark.driver.extraJavaOptions:
+  type: list
+  values:
+    - -XX:+UseG1GC
+    - -XX:+UseParallelGC
+
+spark.network.timeout:
+  type: range
+  min: 100
+  max: 10000
+  step: 100
+  unit: s
+
+spark.sql.autoBroadcastJoinThreshold:
+  type: range
+  min: -1
+  max: 10485760
+  step: 1024
+  unit: b
+
+spark.eventLog.enabled:
+  type: list
+  values:
+    - true
+    - false
+
+spark.eventLog.dir:
+  type: list
+  values:
+    - /tmp/spark-events
+
+spark.sql.broadcastTimeout:
+  type: range
+  min: 1
+  max: 3600
+  step: 600
+  unit: s
+
+spark.sql.codegen.wholeStage:
+  type: list
+  values:
+    - true
+    - false
+
+spark.sql.inMemoryColumnarStorage.compressed:
+  type: list
+  values:
+    - true
+    - false
+
+spark.sql.inMemoryColumnarStorage.batchSize:
+  type: range
+  min: 1000
+  max: 10000
+  step: 1000
+
+spark.sql.files.maxPartitionBytes:
+  type: range
+  min: 134217728
+  max: 1073741824
+  step: 134217728
+  unit: b
+
+spark.sql.files.openCostInBytes:
+  type: range
+  min: 4194304
+  max: 33554432
+  step: 4194304
+  unit: b
+
+spark.sql.sources.parallelPartitionDiscovery.threshold:
+  type: range
+  min: 32
+  max: 1000
+  step: 32
+
+spark.sql.tungsten.enabled:
+  type: list
+  values:
+    - true
+    - false
+
+spark.serializer:
+  type: list
+  values:
+    - org.apache.spark.serializer.JavaSerializer
+    - org.apache.spark.serializer.KryoSerializer
+
+spark.kryo.registrationRequired:
+  type: list
+  values:
+    - true
+    - false
+
+spark.kryo.registrator:
+  type: list
+  values:
+    - MyKryoRegistrator
+
+spark.rdd.compress:
+  type: list
+  values:
+    - true
+    - false
+
+spark.shuffle.compress:
+  type: list
+  values:
+    - true
+    - false
+
+spark.shuffle.spill.compress:
+  type: list
+  values:
+    - true
+    - false
+
+spark.broadcast.compress:
+  type: list
+  values:
+    - true
+    - false
+
+spark.io.compression.codec:
+  type: list
+  values:
+    - lz4
+    - lzf
+    - snappy
+
+
