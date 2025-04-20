@@ -17,7 +17,7 @@ comparator:PerfusionComparator = MatrixComparator()
 def init_env(trial) -> int:
     comparator.deployment(trial)
 
-def test_function():
+def runBenchmark():
     comparator.run()
 
 # Fonction d'objectif pour Optuna
@@ -25,14 +25,14 @@ def objectif(trial):
     # Initialiser l'environnement
     nombre_threads = init_env(trial)
 
-    # Surveiller les ressources avant l'opération
+    # Collect metrics
     processus = psutil.Process(os.getpid())
     debut = time.time()
     cpu_avant = processus.cpu_percent(interval=None)  # Charge CPU du processus
     ram_avant = processus.memory_info().rss / (1024 * 1024)  # RAM utilisée en Mo
 
-    # Multiplication matricielle
-    test_function()  # Taille de la matrice
+    # Run the benchmark
+    runBenchmark()  
 
     # Surveiller les ressources après l'opération
     fin = time.time()
@@ -55,7 +55,6 @@ def objectif(trial):
     # Afficher les résultats
     print(f"Threads : {nombre_threads}, Temps : {temps_execution:.2f} ms, CPU : {charge_cpu:.2f} %, RAM : {consommation_ram:.2f} Mo, Score : {score:.2f}")
     return score
-
 
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)  # Réduire les logs
