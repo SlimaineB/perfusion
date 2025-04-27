@@ -1,15 +1,29 @@
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
 import os
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DoubleType
 
 # Initialize Spark session
 spark = SparkSession.builder \
     .appName("Generate CSV and Parquet") \
+    .config("spark.executor.memory", "8g") \
+    .config("spark.driver.memory", "8g") \
     .getOrCreate()
 
 # Generate a large DataFrame with sample data
-data = [(i, f"name_{i}", i * 10) for i in range(1, 1000001)]  # 1 million rows
+# Définir le schéma attendu
+schema = StructType([
+    StructField("id", IntegerType(), True),
+    StructField("name", StringType(), True),
+    StructField("value", IntegerType(), True)
+])
+
+data = [(i, f"name_{i}", i * 10) for i in range(1, 4000001)]  # 4 million rows
 columns = ["id", "name", "value"]
-df = spark.createDataFrame(data, columns)
+df = spark.createDataFrame(data, schema=schema)
+
+df = df.repartition(10)  # Divise le DataFrame en 10 partitions
+
 
 # MinIO configuration
 minio_endpoint = "http://localhost:9000"
@@ -24,6 +38,11 @@ hadoop_conf.set("fs.s3a.access.key", access_key)
 hadoop_conf.set("fs.s3a.secret.key", secret_key)
 hadoop_conf.set("fs.s3a.path.style.access", "true")
 hadoop_conf.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+
+# Configure S3A committer
+hadoop_conf.set("fs.s3a.committer.staging.conflict-mode", "replace")
+hadoop_conf.set("fs.s3a.committer.staging.unique-filenames", "true")
+hadoop_conf.set("fs.s3a.committer.threads", "10")
 
 # Write DataFrame to CSV on MinIO
 csv_path = f"s3a://{bucket_name}/input/data.csv"

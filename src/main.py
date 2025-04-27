@@ -8,6 +8,7 @@ import sys
 import yaml
 from pyspark.sql import SparkSession
 from pyspark.conf import SparkConf
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DoubleType
 
 from optimizer.hyperopt_optimizer import HyperoptOptimizer
 from optimizer.optuna_optimizer import OptunaOptimizer
@@ -27,11 +28,18 @@ def test_spark_file_format_configuration(**kwargs):
 
     spark = spark_builder.getOrCreate()
 
+    # Définir le schéma attendu
+    schema = StructType([
+        StructField("id", IntegerType(), True),
+        StructField("name", StringType(), True),
+        StructField("value", IntegerType(), True)
+    ])
+
     # Lire les données en fonction du format
     if kwargs.get('file_format') == "csv":
-        df = spark.read.option("header", "true").csv(f"s3a://{bucket_name}/input/data.csv")
+        df = spark.read.option("header", "true").schema(schema).csv(f"s3a://{bucket_name}/input/data.csv")
     elif kwargs.get('file_format') == "parquet":
-        df = spark.read.parquet(f"s3a://{bucket_name}/input/data.parquet")
+        df = spark.read.schema(schema).parquet(f"s3a://{bucket_name}/input/data.parquet")
     else:
         raise ValueError("Invalid file format. Use 'csv' or 'parquet'.")
 
@@ -145,20 +153,20 @@ def test_spark_file_format_function():
         config_spark_file_format = yaml.safe_load(file)
 
     # Optuna Optimization
-    #optuna_optimizer = OptunaOptimizer(test_spark_file_format_configuration, config_spark_file_format)
-    #optuna_optimizer.optimize(n_trials=10, direction="minimize")
+    optuna_optimizer = OptunaOptimizer(test_spark_file_format_configuration, config_spark_file_format)
+    optuna_optimizer.optimize(n_trials=10, direction="minimize")
 
     # Hyperopt Optimization
     hyperopt_optimizer = HyperoptOptimizer(test_spark_file_format_configuration, config_spark_file_format)
     hyperopt_optimizer.optimize(max_evals=10)
     
     # Test All Combinations
-    #combination_optimizer = AllCombinationOptimizer(config_spark_file_format)
-    #results = combination_optimizer.test_combinations(test_spark_file_format_configuration)
+    combination_optimizer = AllCombinationOptimizer(config_spark_file_format)
+    results = combination_optimizer.test_combinations(test_spark_file_format_configuration)
 
-    #print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
+    print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
     print("Best parameters (Hyperopt):", hyperopt_optimizer.get_best_params())
-    #print("Best parameters (AllCombination):", combination_optimizer.get_best_params())
+    print("Best parameters (AllCombination):", combination_optimizer.get_best_params())
 
 
 # Call the functions
