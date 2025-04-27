@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 class BaseOptimizer:
     """
     Base class for all optimizers.
@@ -32,3 +35,9 @@ class BaseOptimizer:
         if unit:
             range_values = [f"{val}{unit}" for val in range_values]
         return range_values
+    
+    def trials_to_dataframe(self)-> pd.DataFrame:
+        """
+        Convert the trials to a pandas DataFrame.
+        """
+        raise NotImplementedError("This method should be implemented in subclasses.")

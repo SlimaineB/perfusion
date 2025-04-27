@@ -1,4 +1,5 @@
 import optuna
+import pandas as pd
 from optimizer.base_optimizer import BaseOptimizer
 from utils.timer import time_function_execution  # Importer la fonction depuis timer.py
 
@@ -46,8 +47,34 @@ class OptunaOptimizer(BaseOptimizer):
             _, elapsed_time = time_function_execution(self.objective_function, **params)  # Utiliser time_function_execution
             return elapsed_time  # Retourner le temps comme score
 
-        self.study = optuna.create_study(direction=direction, sampler=self.sampler, pruner=self.pruner, study_name= "optuna_study", storage="sqlite:///example.db", load_if_exists=True)
+        # Supprimer l'étude existante si elle existe
+        storage_url = "sqlite:///example.db"
+        study_name = "optuna_study"
+        try:
+            optuna.delete_study(study_name=study_name, storage=storage_url)
+            print(f"Étude '{study_name}' supprimée avec succès.")
+        except KeyError:
+            print(f"Aucune étude existante trouvée avec le nom '{study_name}'.")
+
+        # Créer une nouvelle étude
+        self.study = optuna.create_study(
+            direction=direction,
+            sampler=self.sampler,
+            pruner=self.pruner,
+            study_name=study_name,
+            storage=storage_url
+        )
         self.study.optimize(wrapped_objective, n_trials=n_trials)
+
+    def trials_to_dataframe(self) -> pd.DataFrame:
+        trials = self.study.trials
+        data = []
+        for trial in trials:
+            trial_data = trial.params
+            trial_data['score'] = trial.value
+            trial_data['trial_number'] = trial.number
+            data.append(trial_data)
+        return pd.DataFrame(data)
 
     def get_best_params(self):
         """

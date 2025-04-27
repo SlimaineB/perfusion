@@ -1,5 +1,6 @@
 from hyperopt import fmin, tpe, hp, Trials, STATUS_OK
 import numpy as np
+import pandas as pd
 from utils.timer import time_function_execution  # Importer la fonction timer
 
 class HyperoptOptimizer:
@@ -16,6 +17,7 @@ class HyperoptOptimizer:
         self.objective_function = objective_function
         self.config = config
         self.best_params = None
+        self.trials = Trials()
 
     def define_search_space(self):
         """
@@ -47,22 +49,31 @@ class HyperoptOptimizer:
                 'params': params  # Ajout des paramètres pour les logs
             }
 
-        trials = Trials()
         self.best_params = fmin(
             fn=wrapped_objective,
             space=search_space,
             algo=tpe.suggest,
             max_evals=max_evals,
-            trials=trials
+            trials=self.trials
         )
 
         # Afficher les logs détaillés après l'optimisation
-        print("\nDetailed trial results:")
-        for i, trial in enumerate(trials.trials):
-            print(f"Trial {i + 1}:")
-            print(f"  Parameters: {trial['result']['params']}")
-            print(f"  Loss (Execution Time): {trial['result']['loss']:.4f} seconds")
-            print(f"  Status: {trial['result']['status']}")
+        #print("\nDetailed trial results:")
+        #for i, trial in enumerate(self.trials.trials):
+        #    print(f"Trial {i + 1}:")
+        #    print(f"  Parameters: {trial['result']['params']}")
+        #    print(f"  Loss (Execution Time): {trial['result']['loss']:.4f} seconds")
+        #    print(f"  Status: {trial['result']['status']}")
+
+    def trials_to_dataframe(self) -> pd.DataFrame:
+        data = []
+        for trial in self.trials.trials:
+            trial_data = trial["misc"]["vals"]
+            trial_data = {k: v[0] for k, v in trial_data.items()}  # Extraire les valeurs
+            trial_data["score"] = trial["result"]["loss"]
+            trial_data["trial_number"] = trial["tid"]
+            data.append(trial_data)
+        return pd.DataFrame(data)
 
     def get_best_params(self):
         """

@@ -18,10 +18,6 @@ from scenarios.sleep_scenario import SleepScenario
 from scenarios.spark_file_format_scenario import SparkFileFormatScenario
 
 
-
-with open("config_spark.yaml", "r") as file:
-    config_spark = yaml.safe_load(file)
-
 def test_optimization(scenario_class, config_file, n_trials=10, max_evals=10):
     # Load configuration
     with open(config_file, "r") as file:
@@ -31,21 +27,21 @@ def test_optimization(scenario_class, config_file, n_trials=10, max_evals=10):
     scenario = scenario_class()
 
     # Optuna Optimization
-    optuna_optimizer = OptunaOptimizer(scenario.run, config)
-    optuna_optimizer.optimize(n_trials=n_trials, direction="minimize")
+    #optuna_optimizer = OptunaOptimizer(scenario.run, config)
+    #optuna_optimizer.optimize(n_trials=n_trials, direction="minimize")
 
     # Hyperopt Optimization
     #hyperopt_optimizer = HyperoptOptimizer(scenario.run, config)
     #hyperopt_optimizer.optimize(max_evals=max_evals)
 
     # Test All Combinations
-    #combination_optimizer = AllCombinationOptimizer(config)
-    #results = combination_optimizer.test_combinations(scenario.run)
+    combination_optimizer = AllCombinationOptimizer(scenario.run, config)
+    results = combination_optimizer.optimize()
 
     # Print results
-    print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
+    #print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
     #print("Best parameters (Hyperopt):", hyperopt_optimizer.get_best_params())
-    #print("Best parameters (AllCombination):", combination_optimizer.get_best_params())
+    print("Best parameters (AllCombination):", combination_optimizer.get_best_params())
 
 
 def test_sleep_function():
@@ -62,6 +58,6 @@ def test_spark_file_format_function():
 
 # Call the functions
 #test_sleep_function()
-test_matrix_function()
+#test_matrix_function()
 
-#test_spark_file_format_function()
+test_spark_file_format_function()
