@@ -55,7 +55,7 @@ class AllCombinationOptimizer(BaseOptimizer):
         return results
     
 
-    def get_best_combination(self): 
+    def get_best_params(self): 
         """
         Get the best combination found during testing.
         """

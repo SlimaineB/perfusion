@@ -14,39 +14,65 @@ from optimizer.allcombination_optimizer import AllCombinationOptimizer
 
 
 
-def example_function(**kwargs):
+def example_maxtrix_function(**kwargs):
     # Example function to optimize or test
+    operation_type = kwargs.get('operation_type')
+    matrix_size = kwargs.get('matrix_size')
 
+    # Create random matrices
+    matrice_A = np.random.rand(matrix_size, matrix_size)
+    matrice_B = np.random.rand(matrix_size, matrix_size)
 
-    operation = kwargs.get('operation')
-    factor = kwargs.get('factor')
-
-    if operation == "add": 
-        taille_matrice = 100 + kwargs.get('factor')
+    if operation_type == "add": 
+        resultat = np.add(matrice_A, matrice_B)
+    elif operation_type == "multiply":
+        resultat = np.dot(matrice_A, matrice_B)
     else:
-        taille_matrice = 100 * kwargs.get('factor')
+        raise ValueError("Invalid operation type. Use 'add' or 'multiply'.")
+    return resultat.size
 
-    print(f"Testing with parameters: {kwargs}")
-    print(f"Matrix size: {kwargs.get('spark.executor.memory')}")
-    matrice_A = np.random.rand(taille_matrice, taille_matrice)
-    matrice_B = np.random.rand(taille_matrice, taille_matrice)
 
-    # Multiplication matricielle
-    resultat = np.dot(matrice_A, matrice_B)
+def example_sleep_function(**kwargs):
+    sleep_time = kwargs.get('sleep_time')
+    time.sleep(sleep_time)
     return 1
 
 
-# Load configuration
-with open("config.yaml", "r") as file:
-    config = yaml.safe_load(file)
+with open("config_spark.yaml", "r") as file:
+    config_spark = yaml.safe_load(file)
 
-# Optuna Optimization
-optuna_optimizer = OptunaOptimizer(example_function, config)
-optuna_optimizer.optimize(n_trials=10, direction="minimize")
-print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
+def test_sleep_function():
+    # Load configuration
+    with open("config_sleep.yaml", "r") as file:
+        config_sleep = yaml.safe_load(file)
 
-# Test All Combinations
-combination_tester = AllCombinationOptimizer(config)
-results = combination_tester.test_combinations(example_function)
-print("All combinations tested:", combination_tester.get_best_combination())
+    # Optuna Optimization
+    optuna_optimizer = OptunaOptimizer(example_sleep_function, config_sleep)
+    optuna_optimizer.optimize(n_trials=10, direction="minimize")
+    print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
 
+    # Test All Combinations
+    combination_tester = AllCombinationOptimizer(config_sleep)
+    results = combination_tester.test_combinations(example_sleep_function)
+    print("All combinations tested:", combination_tester.get_best_combination())
+
+
+def test_matrix_function():
+    # Load configuration
+    with open("config_matrix.yaml", "r") as file:
+        config_matrix = yaml.safe_load(file)
+
+    # Optuna Optimization
+    optuna_optimizer = OptunaOptimizer(example_maxtrix_function, config_matrix)
+    optuna_optimizer.optimize(n_trials=10, direction="minimize")
+    print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
+
+    # Test All Combinations
+    combination_tester = AllCombinationOptimizer(config_matrix)
+    results = combination_tester.test_combinations(example_maxtrix_function)
+    print("All combinations tested:", combination_tester.get_best_params())
+
+
+# Call the functions
+#test_sleep_function()
+test_matrix_function()

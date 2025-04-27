@@ -1,11 +1,11 @@
-operation:
+operation_type:
   type: list
   values:
     - multiply
     - add
 
-factor:
+matrix_size:
   type: range
-  min: 1
-  max: 16
-  step: 1
+  min: 100
+  max: 500
+  step: 100

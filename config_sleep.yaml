@@ -1,0 +1,5 @@
+sleep_time:
+  type: range
+  min: 1
+  max: 5
+  step: 1
