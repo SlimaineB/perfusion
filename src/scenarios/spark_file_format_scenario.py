@@ -5,7 +5,7 @@ class SparkFileFormatScenario:
     def __init__(self, bucket_name="mon-bucket"):
         self.bucket_name = bucket_name
 
-    def run(self, **kwargs):
+    def run(self, **params):
         spark_builder = SparkSession.builder \
             .appName("MinIO S3 Write Example") \
             .config("spark.hadoop.fs.s3a.endpoint", "http://localhost:9000") \
@@ -22,9 +22,9 @@ class SparkFileFormatScenario:
             StructField("value", IntegerType(), True)
         ])
 
-        if kwargs.get('file_format') == "csv":
+        if params.get('file_format') == "csv":
             df = spark.read.option("header", "true").schema(schema).csv(f"s3a://{self.bucket_name}/input/data.csv")
-        elif kwargs.get('file_format') == "parquet":
+        elif params.get('file_format') == "parquet":
             df = spark.read.schema(schema).parquet(f"s3a://{self.bucket_name}/input/data.parquet")
         else:
             raise ValueError("Invalid file format. Use 'csv' or 'parquet'.")
@@ -39,9 +39,9 @@ class SparkFileFormatScenario:
 
         row_count = filtered_df.count()
 
-        if kwargs.get('file_format') == "csv":
+        if params.get('file_format') == "csv":
             filtered_df.write.mode("overwrite").csv(f"s3a://{self.bucket_name}/output/data.csv")
-        elif kwargs.get('file_format') == "parquet":
+        elif params.get('file_format') == "parquet":
             filtered_df.write.mode("overwrite").parquet(f"s3a://{self.bucket_name}/output/data.parquet")
         else:
             raise ValueError("Invalid file format. Use 'csv' or 'parquet'.")

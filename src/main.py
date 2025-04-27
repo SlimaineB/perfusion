@@ -62,6 +62,6 @@ def test_spark_file_format_function():
 
 # Call the functions
 #test_sleep_function()
-test_matrix_function()
+#test_matrix_function()
 
-#test_spark_file_format_function()
+test_spark_file_format_function()
