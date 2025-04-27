@@ -14,8 +14,13 @@ from comparator.matrix_comparator import MatrixComparator
 # Fixer une graine pour Optuna
 comparator:PerfusionComparator = MatrixComparator()
 
-def init_env(trial) -> int:
+# Init Benchmark environment
+def setup(trial) -> int:
     comparator.deployment(trial)
+
+# Clenup Benchmark environment
+def cleanup(trial) -> None:
+    pass
 
 def runBenchmark():
     comparator.run()
@@ -23,7 +28,7 @@ def runBenchmark():
 # Fonction d'objectif pour Optuna
 def objectif(trial):
     # Initialiser l'environnement
-    nombre_threads = init_env(trial)
+    nombre_threads = setup(trial)
 
     # Collect metrics
     processus = psutil.Process(os.getpid())
@@ -57,7 +62,6 @@ def objectif(trial):
     return score
 
 
-optuna.logging.set_verbosity(optuna.logging.WARNING)  # Réduire les logs
 etude = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=42))
 etude.optimize(objectif, n_trials=20)
 

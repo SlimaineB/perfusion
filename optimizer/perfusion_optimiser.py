@@ -1,8 +1,11 @@
+from comparator.perfusion_comparator import PerfusionComparator
+
+
 class PerfusionOptimizer:
     """
     Class to optimize perfusion parameters for a given set of data.
     """
-    def __init__(self, data):
+    def __init__(self, data, comparator:PerfusionComparator):
         """
         Initialize the optimizer with the provided data.
 
@@ -10,6 +13,7 @@ class PerfusionOptimizer:
         """
         self.data = data
         self.optimized_parameters = None
+        self.comparator = comparator
 
     def optimize(self):
         """
