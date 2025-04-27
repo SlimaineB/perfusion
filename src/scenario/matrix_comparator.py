@@ -1,7 +1,7 @@
 # matrix_comparator.py
 import os
 import numpy as np
-from comparator.perfusion_comparator import PerfusionComparator
+from scenario.perfusion_comparator import PerfusionComparator
 
 MATRIX_SIZE = 1000  # Taille de la matrice
 

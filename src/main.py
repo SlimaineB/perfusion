@@ -7,8 +7,7 @@ import psutil
 import sys
 import yaml
 
-from comparator.perfusion_comparator import PerfusionComparator
-from comparator.matrix_comparator import MatrixComparator
+from optimizer.hyperopt_optimizer import HyperoptOptimizer
 from optimizer.optuna_optimizer import OptunaOptimizer
 from optimizer.allcombination_optimizer import AllCombinationOptimizer
 
@@ -17,7 +16,7 @@ from optimizer.allcombination_optimizer import AllCombinationOptimizer
 def example_maxtrix_function(**kwargs):
     # Example function to optimize or test
     operation_type = kwargs.get('operation_type')
-    matrix_size = kwargs.get('matrix_size')
+    matrix_size = int(kwargs.get('matrix_size'))
 
     # Create random matrices
     matrice_A = np.random.rand(matrix_size, matrix_size)
@@ -66,6 +65,12 @@ def test_matrix_function():
     optuna_optimizer = OptunaOptimizer(example_maxtrix_function, config_matrix)
     optuna_optimizer.optimize(n_trials=10, direction="minimize")
     print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
+
+
+    # Hyperopt Optimization
+    hyperopt_optimizer = HyperoptOptimizer(example_maxtrix_function, config_matrix)
+    hyperopt_optimizer.optimize(max_evals=10)
+    print("Best parameters (Hyperopt):", hyperopt_optimizer.get_best_params())
 
     # Test All Combinations
     combination_tester = AllCombinationOptimizer(config_matrix)

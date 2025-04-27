@@ -1,5 +1,5 @@
 # kafka_comparator.py
-from comparator.perfusion_comparator import PerfusionComparator
+from scenario.perfusion_comparator import PerfusionComparator
 
 class KafkaComparator(PerfusionComparator ):
     def deployment(self, trial=None):
