@@ -1,0 +1,5 @@
+file_format:
+  type: list
+  values:
+    - csv
+    - parquet
