@@ -13,9 +13,20 @@ from optimizer.allcombination_optimizer import AllCombinationOptimizer
 from scenarios.matrix_operation_scenario import MatrixOperationScenario
 
 
-# Charger l’étude Optuna
-def load_study(study_name, storage_url):
-    return optuna.load_study(study_name=study_name, storage=storage_url)
+
+def get_class_by_name(class_name, module_name):
+    try:
+        # Browse all Python files in the folder
+        module_path = os.path.join(os.path.dirname(__file__), module_name)
+        for file in os.listdir(module_path):
+            if file.endswith(".py") and not file.startswith("__"):
+                module = importlib.import_module(f"{module_name}.{file[:-3]}")
+                if hasattr(module, class_name):
+                    return getattr(module, class_name)
+        raise ValueError(f"Class '{class_name}' not found in module '{module_name}'.")
+    except Exception as e:
+        raise ValueError(f"Error while loading class '{class_name}': {e}")
+
 
 def test_optimization(scenario_class, optimizer_class, config_file, n_trials=10, max_evals=10):
     # Load configuration
@@ -37,60 +48,65 @@ def test_optimization(scenario_class, optimizer_class, config_file, n_trials=10,
     print(f"Best parameters of {scenario_class.__name__} with {optimizer_class.__name__}: {optimizer.get_best_params()}")
 
     df = optimizer.trials_to_dataframe()
-    df.show()
-
-    return optimizer.trials_to_dataframe()
 
 
-def get_class_by_name(class_name, module_name):
-    try:
-        # Parcourir tous les fichiers Python dans le dossier
-        module_path = os.path.join(os.path.dirname(__file__), module_name)
-        for file in os.listdir(module_path):
-            if file.endswith(".py") and not file.startswith("__"):
-                module = importlib.import_module(f"{module_name}.{file[:-3]}")
-                if hasattr(module, class_name):
-                    return getattr(module, class_name)
-        raise ValueError(f"Classe '{class_name}' introuvable dans le module '{module_name}'.")
-    except Exception as e:
-        raise ValueError(f"Erreur lors du chargement de la classe '{class_name}': {e}")
 
-# Interface Streamlit
-st.title("Visualisation et Création d’études")
+    return df
 
-# Section pour créer une nouvelle étude Optuna
-st.header("Créer une nouvelle étude Optuna")
-new_study_name = st.text_input("Nom de la nouvelle étude", "new_study")
-storage_url = st.text_input("URL de stockage Optuna", "sqlite:///example.db")
+
+
+# Streamlit Interface
+st.title("Visualize and Create Study")
+
+# Section to create a new Optuna study
+st.header("Launch Study")
 optimizer_name = st.selectbox("Optimizer", ["OptunaOptimizer", "HyperoptOptimizer", "AllCombinationOptimizer"])
 scenario_name = st.selectbox("Scenario", ["MatrixOperationScenario", "SleepScenario", "SparkFileFormatScenario"])
-n_trials_optuna = st.number_input("Nombre d’essais Optuna", min_value=1, max_value=1000, value=50, step=1)
-df = pd.DataFrame()
+#n_trials_optuna = st.number_input("Number of Optuna trials", min_value=1, max_value=1000, value=50, step=1)
 
 
-if st.button("Créer et optimiser une étude"):
+if st.button("Create and Optimize Study"):
     try:
         optimizer_class = get_class_by_name(optimizer_name,module_name="optimizer")
         scenario_class= get_class_by_name(scenario_name,module_name="scenarios")
         df = test_optimization(scenario_class, optimizer_class, "config_matrix.yaml")
-        st.success(f"Étude avec '{optimizer_name}' créée et optimisée avec succès !")
+        st.success(f"Study with '{optimizer_name}' created and optimized successfully!")
+        st.write("Trials data:")
+        st.dataframe(df)
+        
+        # Create a Plotly chart
+        if not df.empty:
+            fig = px.scatter(
+                df,
+                x="trial_number",
+                y="score",
+                color="trial_number",
+                hover_data=df.columns,
+                title="Optuna Trials Scores",
+                labels={"trial_number": "Trial Number", "score": "Score"}
+            )
+            st.plotly_chart(fig)
+        else:
+            st.warning("No trials found in the study.")
+
+
     except ValueError as e:
-        st.error(f"Erreur : {e}")
+        st.error(f"Error: {e}")
     except Exception as e:
-        st.error(f"Erreur lors de la création de l’étude : {e}")
+        st.error(f"Error while creating the study: {e}")
 
-# Section pour visualiser une étude Optuna existante
-st.header("Visualiser une étude existante")
-#study_name = st.text_input("Nom de l’étude Optuna à visualiser", "example_study")
+# Section to visualize an existing Optuna study
+st.header("Visualize an existing study")
+#study_name = st.text_input("Name of the Optuna study to visualize", "example_study")
 
-if st.button("Charger et afficher les essais Optuna"):
+if st.button("Load and display Optuna trials"):
     try:
 
-        # Afficher le DataFrame
-        st.write("Données des essais Optuna :")
+        # Display the DataFrame
+        st.write("Trials data:")
         st.dataframe(df)
 
-        # Créer un graphique Plotly
+        # Create a Plotly chart
         if not df.empty:
             fig = px.scatter(
                 df,
@@ -98,58 +114,12 @@ if st.button("Charger et afficher les essais Optuna"):
                 y="score",
                 color="trial_number",
                 hover_data=df.columns,
-                title="Scores des essais Optuna",
-                labels={"trial_number": "Numéro d’essai", "score": "Score"}
+                title="Optuna Trials Scores",
+                labels={"trial_number": "Trial Number", "score": "Score"}
             )
             st.plotly_chart(fig)
         else:
-            st.warning("Aucun essai trouvé dans l’étude.")
+            st.warning("No trials found in the study.")
     except Exception as e:
-        st.error(f"Erreur lors du chargement de l’étude : {e}")
+        st.error(f"Error while loading the study: {e}")
 
-# Section pour créer une nouvelle étude Hyperopt
-st.header("Créer une nouvelle étude Hyperopt")
-n_trials_hyperopt = st.number_input("Nombre d’essais Hyperopt", min_value=1, max_value=1000, value=50, step=1)
-
-if st.button("Créer et optimiser une étude Hyperopt"):
-    try:
-        # Définir l’espace de recherche
-        space = {
-            "x": hp.uniform("x", -10, 10),
-            "y": hp.uniform("y", -10, 10),
-        }
-
-        # Lancer l’optimisation
-        trials = Trials()
-        best = fmin(
-            fn=hyperopt_objective,
-            space=space,
-            algo=tpe.suggest,
-            max_evals=n_trials_hyperopt,
-            trials=trials,
-        )
-
-        # Convertir les résultats en DataFrame
-        df = trials_to_dataframe_hyperopt(trials)
-
-        # Afficher les résultats
-        st.write("Meilleurs paramètres :", best)
-        st.write("Données des essais Hyperopt :")
-        st.dataframe(df)
-
-        # Créer un graphique Plotly
-        if not df.empty:
-            fig = px.scatter(
-                df,
-                x="trial_number",
-                y="score",
-                color="trial_number",
-                hover_data=df.columns,
-                title="Scores des essais Hyperopt",
-                labels={"trial_number": "Numéro d’essai", "score": "Score"}
-            )
-            st.plotly_chart(fig)
-        else:
-            st.warning("Aucun essai trouvé.")
-    except Exception as e:
-        st.error(f"Erreur lors de l’optimisation : {e}")
