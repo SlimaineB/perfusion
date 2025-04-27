@@ -15,44 +15,50 @@ from optimizer.allcombination_optimizer import AllCombinationOptimizer
 
 
 def test_spark_file_format_configuration(**kwargs):
-
     bucket_name = "mon-bucket"
 
     spark_builder = SparkSession.builder \
-    .appName("MinIO S3 Write Example") \
-    .config("spark.hadoop.fs.s3a.endpoint", "http://localhost:9000") \
-    .config("spark.hadoop.fs.s3a.access.key", "admin") \
-    .config("spark.hadoop.fs.s3a.secret.key", "password") \
-    .config("spark.hadoop.fs.s3a.path.style.access", "true") \
-    .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") 
-    
-    #for key, value in kwargs.items():
-    #    spark_builder = spark_builder.config(key, value)
-    
+        .appName("MinIO S3 Write Example") \
+        .config("spark.hadoop.fs.s3a.endpoint", "http://localhost:9000") \
+        .config("spark.hadoop.fs.s3a.access.key", "admin") \
+        .config("spark.hadoop.fs.s3a.secret.key", "password") \
+        .config("spark.hadoop.fs.s3a.path.style.access", "true") \
+        .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+
     spark = spark_builder.getOrCreate()
 
+    # Lire les données en fonction du format
     if kwargs.get('file_format') == "csv":
-        # Read Csv S3
-        df = spark.read.csv(f"s3a://{bucket_name}/input/data.csv")
+        df = spark.read.option("header", "true").csv(f"s3a://{bucket_name}/input/data.csv")
     elif kwargs.get('file_format') == "parquet":
-        # Read Parquet S3
         df = spark.read.parquet(f"s3a://{bucket_name}/input/data.parquet")
-    else:   
+    else:
         raise ValueError("Invalid file format. Use 'csv' or 'parquet'.")
 
+    # Opérations coûteuses
+    # 1. Transformation : Ajouter une colonne calculée
+    df = df.withColumn("new_col", (df["value"].cast("double") * 2))
 
-    # Faire une opération simple
-    row_count = df.count()
+    # 2. Agrégation : Calculer des statistiques
+    agg_result = df.groupBy("name").agg({"new_col": "avg", "id": "count"})
 
-    
+    # 3. Jointure : Joindre le DataFrame avec lui-même
+    df1 = df.selectExpr("id as id1", "name as name1", "new_col as new_col1")
+    df2 = df.selectExpr("id as id2", "name as name2", "new_col as new_col2")
+    joined_df = df1.join(df2, df1["name1"] == df2["name2"])
 
+    # 4. Filtrage : Appliquer un filtre complexe
+    filtered_df = joined_df.filter(joined_df["new_col1"] > 100)
+
+    # Compter les lignes finales
+    row_count = filtered_df.count()
+
+    # Écrire les données transformées
     if kwargs.get('file_format') == "csv":
-        # Write to CSV
-        df.write.mode("overwrite").csv(f"s3a://{bucket_name}/output/data.csv")
+        filtered_df.write.mode("overwrite").csv(f"s3a://{bucket_name}/output/data.csv")
     elif kwargs.get('file_format') == "parquet":
-        # Write to S3Parquet
-        df.write.mode("overwrite").parquet(f"s3a://{bucket_name}/output/data.parquet")
-    else:   
+        filtered_df.write.mode("overwrite").parquet(f"s3a://{bucket_name}/output/data.parquet")
+    else:
         raise ValueError("Invalid file format. Use 'csv' or 'parquet'.")
 
     spark.stop()
@@ -95,12 +101,19 @@ def test_sleep_function():
     # Optuna Optimization
     optuna_optimizer = OptunaOptimizer(example_sleep_function, config_sleep)
     optuna_optimizer.optimize(n_trials=10, direction="minimize")
-    print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
+
+    # Hyperopt Optimization
+    hyperopt_optimizer = HyperoptOptimizer(example_sleep_function, config_sleep)
+    hyperopt_optimizer.optimize(max_evals=10)
 
     # Test All Combinations
     combination_optimizer = AllCombinationOptimizer(config_sleep)
     results = combination_optimizer.test_combinations(example_sleep_function)
-    print("All combinations tested:", combination_optimizer.get_best_combination())
+
+
+    print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
+    print("Best parameters (Hyperopt):", hyperopt_optimizer.get_best_params())
+    print("Best parameters (AllCombination):", combination_optimizer.get_best_params())
 
 
 def test_matrix_function():
@@ -111,18 +124,19 @@ def test_matrix_function():
     # Optuna Optimization
     optuna_optimizer = OptunaOptimizer(example_maxtrix_function, config_matrix)
     optuna_optimizer.optimize(n_trials=10, direction="minimize")
-    print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
-
 
     # Hyperopt Optimization
     hyperopt_optimizer = HyperoptOptimizer(example_maxtrix_function, config_matrix)
     hyperopt_optimizer.optimize(max_evals=10)
-    print("Best parameters (Hyperopt):", hyperopt_optimizer.get_best_params())
 
     # Test All Combinations
     combination_optimizer = AllCombinationOptimizer(config_matrix)
     results = combination_optimizer.test_combinations(example_maxtrix_function)
-    print("All combinations tested:", combination_optimizer.get_best_params())
+
+    
+    print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
+    print("Best parameters (Hyperopt):", hyperopt_optimizer.get_best_params())
+    print("Best parameters (AllCombination):", combination_optimizer.get_best_params())
 
 
 def test_spark_file_format_function():
@@ -142,9 +156,9 @@ def test_spark_file_format_function():
     #combination_optimizer = AllCombinationOptimizer(config_spark_file_format)
     #results = combination_optimizer.test_combinations(test_spark_file_format_configuration)
 
-    print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
+    #print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
     print("Best parameters (Hyperopt):", hyperopt_optimizer.get_best_params())
-    print("Best parameters (AllCombination):", combination_optimizer.get_best_params())
+    #print("Best parameters (AllCombination):", combination_optimizer.get_best_params())
 
 
 # Call the functions
