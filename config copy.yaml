@@ -4,11 +4,6 @@ spark.master:
     - local
     - local[*]
 
-spark.app.name:
-  type: list
-  values:
-    - MySparkApp
-
 spark.executor.memory:
   type: range
   min: 1
@@ -50,7 +45,7 @@ spark.sql.shuffle.partitions:
 spark.sql.warehouse.dir:
   type: list
   values:
-    - /user/hive/warehouse
+    - /tmp/hive/warehouse
 
 spark.executor.extraJavaOptions:
   type: list
@@ -64,128 +59,72 @@ spark.driver.extraJavaOptions:
     - -XX:+UseG1GC
     - -XX:+UseParallelGC
 
-spark.network.timeout:
+spark.hadoop.fs.s3a.committer.magic.enabled:
+  type: list
+  values:
+    - true
+    - false
+
+spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a:
+  type: list
+  values:
+    - org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory
+
+fs.s3a.experimental.input.fadvise:
+  type: list
+  values:
+    - random
+    - sequential
+    - normal
+
+fs.s3a.threads.max:
   type: range
-  min: 100
-  max: 10000
-  step: 100
-  unit: s
+  min: 10
+  max: 100
+  step: 10
 
-spark.sql.autoBroadcastJoinThreshold:
+fs.s3a.connection.maximum:
   type: range
-  min: -1
-  max: 10485760
-  step: 1024
-  unit: b
+  min: 10
+  max: 100
+  step: 10
 
-spark.eventLog.enabled:
-  type: list
-  values:
-    - true
-    - false
-
-spark.eventLog.dir:
-  type: list
-  values:
-    - /tmp/spark-events
-
-spark.sql.broadcastTimeout:
+fs.s3a.block.size:
   type: range
-  min: 1
-  max: 3600
-  step: 600
-  unit: s
+  min: 8
+  max: 128
+  step: 8
+  unit: M
 
-spark.sql.codegen.wholeStage:
-  type: list
-  values:
-    - true
-    - false
-
-spark.sql.inMemoryColumnarStorage.compressed:
-  type: list
-  values:
-    - true
-    - false
-
-spark.sql.inMemoryColumnarStorage.batchSize:
+fs.s3a.bucket.probe:
   type: range
-  min: 1000
-  max: 10000
-  step: 1000
+  min: 0
+  max: 1
+  step: 1
 
-spark.sql.files.maxPartitionBytes:
-  type: range
-  min: 134217728
-  max: 1073741824
-  step: 134217728
-  unit: b
+fs.s3a.committer.name:
+  type: list
+  values:
+    - magic
+    - directory
+    - partitioned
+    - file
 
-spark.sql.files.openCostInBytes:
-  type: range
-  min: 4194304
-  max: 33554432
-  step: 4194304
-  unit: b
+spark.sql.sources.commitProtocolClass:
+  type: list
+  values:
+    - org.apache.spark.internal.io.cloud.PathOutputCommitProtocol
+    - org.apache.spark.sql.execution.datasources.SQLHadoopMapReduceCommitProtocol
 
-spark.sql.sources.parallelPartitionDiscovery.threshold:
-  type: range
-  min: 32
-  max: 1000
-  step: 32
-
-spark.sql.tungsten.enabled:
+spark.hadoop.fs.s3a.committer.magic.enabled:
   type: list
   values:
     - true
     - false
 
-spark.serializer:
+spark.sql.parquet.output.committer.class:
   type: list
   values:
-    - org.apache.spark.serializer.JavaSerializer
-    - org.apache.spark.serializer.KryoSerializer
-
-spark.kryo.registrationRequired:
-  type: list
-  values:
-    - true
-    - false
-
-spark.kryo.registrator:
-  type: list
-  values:
-    - MyKryoRegistrator
-
-spark.rdd.compress:
-  type: list
-  values:
-    - true
-    - false
-
-spark.shuffle.compress:
-  type: list
-  values:
-    - true
-    - false
-
-spark.shuffle.spill.compress:
-  type: list
-  values:
-    - true
-    - false
-
-spark.broadcast.compress:
-  type: list
-  values:
-    - true
-    - false
-
-spark.io.compression.codec:
-  type: list
-  values:
-    - lz4
-    - lzf
-    - snappy
-
-
+    - org.apache.spark.internal.io.cloud.BindingParquetOutputCommitter
+    - org.apache.parquet.hadoop.ParquetOutputCommitter
+    - com.amazon.emr.committer.EmrOptimizedSparkSqlParquetOutputCommitter
