@@ -35,17 +35,17 @@ def test_optimization(scenario_class, config_file, n_trials=10, max_evals=10):
     optuna_optimizer.optimize(n_trials=n_trials, direction="minimize")
 
     # Hyperopt Optimization
-    hyperopt_optimizer = HyperoptOptimizer(scenario.run, config)
-    hyperopt_optimizer.optimize(max_evals=max_evals)
+    #hyperopt_optimizer = HyperoptOptimizer(scenario.run, config)
+    #hyperopt_optimizer.optimize(max_evals=max_evals)
 
     # Test All Combinations
-    combination_optimizer = AllCombinationOptimizer(config)
-    results = combination_optimizer.test_combinations(scenario.run)
+    #combination_optimizer = AllCombinationOptimizer(config)
+    #results = combination_optimizer.test_combinations(scenario.run)
 
     # Print results
     print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
-    print("Best parameters (Hyperopt):", hyperopt_optimizer.get_best_params())
-    print("Best parameters (AllCombination):", combination_optimizer.get_best_params())
+    #print("Best parameters (Hyperopt):", hyperopt_optimizer.get_best_params())
+    #print("Best parameters (AllCombination):", combination_optimizer.get_best_params())
 
 
 def test_sleep_function():
@@ -62,6 +62,6 @@ def test_spark_file_format_function():
 
 # Call the functions
 #test_sleep_function()
-#test_matrix_function()
+test_matrix_function()
 
-test_spark_file_format_function()
+#test_spark_file_format_function()

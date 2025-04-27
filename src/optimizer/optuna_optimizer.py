@@ -46,7 +46,7 @@ class OptunaOptimizer(BaseOptimizer):
             _, elapsed_time = time_function_execution(self.objective_function, **params)  # Utiliser time_function_execution
             return elapsed_time  # Retourner le temps comme score
 
-        self.study = optuna.create_study(direction=direction, sampler=self.sampler, pruner=self.pruner)
+        self.study = optuna.create_study(direction=direction, sampler=self.sampler, pruner=self.pruner, study_name= "optuna_study", storage="sqlite:///example.db", load_if_exists=True)
         self.study.optimize(wrapped_objective, n_trials=n_trials)
 
     def get_best_params(self):
