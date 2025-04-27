@@ -16,7 +16,16 @@ from optimizer.allcombination_optimizer import AllCombinationOptimizer
 
 def example_function(**kwargs):
     # Example function to optimize or test
-    taille_matrice = 100 * kwargs.get('spark.executor.memory')
+
+
+    operation = kwargs.get('operation')
+    factor = kwargs.get('factor')
+
+    if operation == "add": 
+        taille_matrice = 100 + kwargs.get('factor')
+    else:
+        taille_matrice = 100 * kwargs.get('factor')
+
     print(f"Testing with parameters: {kwargs}")
     print(f"Matrix size: {kwargs.get('spark.executor.memory')}")
     matrice_A = np.random.rand(taille_matrice, taille_matrice)
