@@ -36,6 +36,9 @@ def test_optimization(scenario_class, optimizer_class, config_file, n_trials=10,
 
     print(f"Best parameters of {scenario_class.__name__} with {optimizer_class.__name__}: {optimizer.get_best_params()}")
 
+    df = optimizer.trials_to_dataframe()
+    df.show()
+
     return optimizer.trials_to_dataframe()
 
 
