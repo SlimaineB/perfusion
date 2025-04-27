@@ -98,9 +98,9 @@ def test_sleep_function():
     print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
 
     # Test All Combinations
-    combination_tester = AllCombinationOptimizer(config_sleep)
-    results = combination_tester.test_combinations(example_sleep_function)
-    print("All combinations tested:", combination_tester.get_best_combination())
+    combination_optimizer = AllCombinationOptimizer(config_sleep)
+    results = combination_optimizer.test_combinations(example_sleep_function)
+    print("All combinations tested:", combination_optimizer.get_best_combination())
 
 
 def test_matrix_function():
@@ -120,9 +120,9 @@ def test_matrix_function():
     print("Best parameters (Hyperopt):", hyperopt_optimizer.get_best_params())
 
     # Test All Combinations
-    combination_tester = AllCombinationOptimizer(config_matrix)
-    results = combination_tester.test_combinations(example_maxtrix_function)
-    print("All combinations tested:", combination_tester.get_best_params())
+    combination_optimizer = AllCombinationOptimizer(config_matrix)
+    results = combination_optimizer.test_combinations(example_maxtrix_function)
+    print("All combinations tested:", combination_optimizer.get_best_params())
 
 
 def test_spark_file_format_function():
@@ -131,20 +131,20 @@ def test_spark_file_format_function():
         config_spark_file_format = yaml.safe_load(file)
 
     # Optuna Optimization
-    optuna_optimizer = OptunaOptimizer(test_spark_file_format_configuration, config_spark_file_format)
-    optuna_optimizer.optimize(n_trials=10, direction="minimize")
-    print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
-
+    #optuna_optimizer = OptunaOptimizer(test_spark_file_format_configuration, config_spark_file_format)
+    #optuna_optimizer.optimize(n_trials=10, direction="minimize")
 
     # Hyperopt Optimization
     hyperopt_optimizer = HyperoptOptimizer(test_spark_file_format_configuration, config_spark_file_format)
     hyperopt_optimizer.optimize(max_evals=10)
-    print("Best parameters (Hyperopt):", hyperopt_optimizer.get_best_params())
-
+    
     # Test All Combinations
-    combination_tester = AllCombinationOptimizer(config_spark_file_format)
-    results = combination_tester.test_combinations(test_spark_file_format_configuration)
-    print("All combinations tested:", combination_tester.get_best_params())
+    #combination_optimizer = AllCombinationOptimizer(config_spark_file_format)
+    #results = combination_optimizer.test_combinations(test_spark_file_format_configuration)
+
+    print("Best parameters (Optuna):", optuna_optimizer.get_best_params())
+    print("Best parameters (Hyperopt):", hyperopt_optimizer.get_best_params())
+    print("Best parameters (AllCombination):", combination_optimizer.get_best_params())
 
 
 # Call the functions

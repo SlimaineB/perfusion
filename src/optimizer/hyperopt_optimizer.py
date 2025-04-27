@@ -71,9 +71,15 @@ class HyperoptOptimizer:
         if self.best_params is None:
             raise ValueError("No optimization has been run yet.")
         
-        # Convertir les types NumPy en types natifs Python
-        converted_params = {key: (int(value) if isinstance(value, (np.integer, np.int64)) else
-                                  float(value) if isinstance(value, (np.floating, np.float64)) else
-                                  value)
-                            for key, value in self.best_params.items()}
+        # Convertir les types NumPy en types natifs Python et gérer hp.choice
+        converted_params = {}
+        for key, value in self.best_params.items():
+            if key in self.config and self.config[key]['type'] == 'list':
+                # Mapper l'indice à la valeur réelle pour hp.choice
+                converted_params[key] = self.config[key]['values'][int(value)]
+            else:
+                # Convertir les types NumPy en types natifs Python
+                converted_params[key] = (int(value) if isinstance(value, (np.integer, np.int64)) else
+                                         float(value) if isinstance(value, (np.floating, np.float64)) else
+                                         value)
         return converted_params
